@@ -1,0 +1,62 @@
+/*Global*/
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+:root{
+    --colorMain: #000050;
+}
+.link{
+    color: white;
+    text-decoration: none;
+}
+.image{
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+}
+body{
+    background-color: aliceblue;
+}
+.section:not(.sectionMenu){
+    width: 90vw;
+    height: 100vh;
+    display: flex;
+}
+.container:not(.containerMenu){
+    width: 100%;
+    height: 100%;
+    padding: 18px;
+}
+/*Header*/
+.sectionMenu{
+    width: 10vw;
+    height: 100%;
+    background-color: var(--colorMain);
+    position: fixed;
+    display: flex;
+    align-items: center;
+}
+.containerMenu{
+    width: 100%;
+    height: 60%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-direction: column;
+}
+.icon{
+    width: 100px;
+    height: 100px;
+}
+/*Card*/
+.sectionCard{
+    background-color: aqua;
+}
+.boxCard{
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: end;
+}
