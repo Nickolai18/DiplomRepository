@@ -6,6 +6,7 @@
 }
 :root{
     --colorMain: #000050;
+    --borderMain: 7px;
 }
 .link{
     color: white;
@@ -28,8 +29,16 @@ body{
 .container:not(.containerMenu){
     width: 90vw;
     height: 100%;
-    background-color: antiquewhite;
+    /* background-color: antiquewhite; */
     padding: 18px;
+}
+.button{
+    width: 70px;
+    height: 30px;
+    background-color: deepskyblue;
+    color: white;
+    border: 0;
+    border-radius: var(--borderMain);
 }
 /*Header*/
 .sectionMenu{
@@ -54,11 +63,41 @@ body{
 }
 /*Card*/
 .sectionCard{
-    background-color: aqua;
+    /* background-color: antiquewhite; */
+}
+.containerCard{
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    height: fit-content;
 }
 .boxCard{
     width: 100vw;
     height: 100vh;
     display: flex;
     justify-content: end;
+}
+.card{
+    width: 15.6%;
+    height: 300px;
+    background-color: whitesmoke;
+    padding: 15px;
+    border-radius: var(--borderMain);
+    display: flex;
+    justify-content: space-around;
+    flex-direction: column;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 20px;
+    box-shadow: 2px -2px 5px 0px grey;
+}
+.card:nth-child(6n){
+    margin-right: 0px;
+}   
+.card:nth-last-child(-n+6){
+    margin-bottom: 0px;
+}
+.buttonCard{
+    align-self: end;
 }
