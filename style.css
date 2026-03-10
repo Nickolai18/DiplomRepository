@@ -92,9 +92,9 @@ body{
     margin-bottom: 20px;
     box-shadow: 2px -2px 5px 0px grey;
 }
-.card:nth-child(6n){
+/* .card:nth-child(6n){
     margin-right: 0px;
-}   
+}    */
 .card:nth-last-child(-n+6){
     margin-bottom: 0px;
 }
