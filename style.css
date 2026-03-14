@@ -64,22 +64,22 @@ body{
 /*Card*/
 .sectionCard{
     /* background-color: antiquewhite; */
-}
-.containerCard{
-    width: 100%;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: stretch;
-    height: fit-content;
+    width: 99vw!important;
 }
 .boxCard{
-    width: 100vw;
-    height: 100vh;
     display: flex;
-    justify-content: end;
+    justify-content: center;
+}
+.containerCard{
+    max-width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    height: fit-content;
+    justify-content: space-between;
+    margin-left: 1vw;
 }
 .card{
-    width: 15.6%;
+    width: 14.6%;
     height: 300px;
     background-color: whitesmoke;
     padding: 15px;
