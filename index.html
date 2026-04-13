@@ -30,16 +30,17 @@
                                 Lorem ipsum dolor, sit amet consectetur adipisicing elit. Reiciendis doloribus similique libero maxime, accusantium quam facilis odio nemo ipsa nobis vero unde. Unde eius impedit ducimus minus laborum possimus aliquid!
                             </div>
                             <div class="person">
-                                <select id="country" name="country">
-                                    <option value="">Сотрудник</option>
+                                <!-- <select id="country" name="country" class="selectEmploer">
+                                    <option value="ss">Сотрудник</option>
                                     <option value="ru">Россия</option>
                                     <option value="by">Беларусь</option>
                                     <option value="kz">Казахстан</option>
-                                </select>
+                                </select> -->
+                                <input name="emplo" id="emplo" class="selectEmploer" type="text">
                             </div>
-                            <button class="button buttonCard">Принять</button>
+                            <button onclick="send()" class="button buttonCard">Принять</button>
                         </div>
-                        <div class="card">
+                        <!-- <div class="card">
                             <span class="numberAud">
                                 Номер кабинета
                             </span>
@@ -290,7 +291,7 @@
                                 </select>
                             </div>
                             <button class="button buttonCard">Принять</button>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </section>
@@ -299,5 +300,34 @@
     <footer>
         <!-- <a href="https://www.flaticon.com/ru/free-icons/" title="онлайн-заявка иконки">Онлайн-заявка иконки от Icon home - Flaticon</a> -->
     </footer>
+    <script>
+        // let sel = document.querySelector(".selectEmploer").value
+        // let btn = document.querySelector(".buttonCard")
+        // console.log(sel)
+        // function selFnc(){
+        //     console.log(sel)
+        // }
+        // btn.addEventListener("click", selFnc)
+        async function send(){
+ 
+        // получаем введеное в поле имя и возраст
+        const username = document.getElementById("emplo").value;
+ 
+        // отправляем запрос
+        const response = await fetch("/hello", {
+                method: "POST",
+                headers: { "Accept": "application/json", "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    emploer: username,
+                })
+            });
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById("message").textContent = data.message;
+            }
+            else
+                console.log(response);
+        }
+    </script>
 </body>
 </html>
