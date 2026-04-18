@@ -21,26 +21,50 @@ class Task(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String)
     description = Column(String)
-    isComplete = Column(Integer)
+    employee = Column(String)
 
     def deserialzator(self):
         des = {
             "title":self.title,
             "description":self.description,
-            "isComplete":self.isComplete
+            "employee":self.employee
         }
         return des
+class User(Base):
+    __tablename__ = "users"
 
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    code = Column(String)
+    task = Column(Integer)
+
+    def deserialzator(self):
+        des = {
+            "name": self.name,
+            "code": self.code,
+            "task": self.task
+        }
+        return des
 ol = db.query(Task)
+usersUndes = db.query(User)
+users = []
 arrOfTest = []
 hh = {"jj":"hjghghg"}
 for elem in ol:
     # print(f"{elem.id} {elem.title}-{elem.description}")
     # print(elem.deserialzator())
     arrOfTest.append(elem.deserialzator())
+for user in usersUndes:
+    # print(user.deserialzator())
+    users.append(user.deserialzator())
 app = FastAPI()
-print(type(ol))
 app.mount("/static", StaticFiles(directory="static"))
+
+@app.get("/api/users")
+def get_users():
+    for user in users:
+        print(user)
+    return users
 @app.get("/api/tasks")
 def render_main_page():
     # for test in ol:
@@ -63,11 +87,11 @@ def test():
             "isComplete":"0",
         },
     }
-# @app.post("/postdata")
-# def form(country = Form(), emplo=Form()):
-#     new_task = Task(id=10,title="New", description=f"{country}+{emplo}", isComplete=0)
-#     db.add(new_task)
-#     db.commit()
-#     for elem in ol:
-#         print(f"{elem.id} {elem.title}-{elem.description}")
-#     return RedirectResponse("/", status_code=301)
+@app.post("/postdata")
+def form(country = Form()):
+    new_task = Task(id=14,title="New69", description=f"{country}", employee="ru")
+    db.add(new_task)
+    db.commit()
+    for elem in ol:
+        print(f"{elem.id} {elem.title}-{elem.description}")
+    return RedirectResponse("/", status_code=301)
