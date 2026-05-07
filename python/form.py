@@ -1,13 +1,13 @@
-from fastapi import FastAPI, Form
+from fastapi import FastAPI, Form, Body
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from numpy.f2py.auxfuncs import iscomplex
 from sqlalchemy import create_engine, Column, Integer, String, DateTime
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 from fastapi.responses import RedirectResponse
+from pydantic import BaseModel
 from bd import SessionLocal
 
-SQLALCHEMY_DATABASE_URL = "mysql://root:root@127.0.0.1:3306/tasks"
+SQLALCHEMY_DATABASE_URL = "mysql://root:root@127.0.0.1:3306/calls"
 engine=create_engine(SQLALCHEMY_DATABASE_URL)
 
 SessionLocal = sessionmaker(autoflush=False, bind=engine)
@@ -15,8 +15,8 @@ db = SessionLocal()
 
 class Base(DeclarativeBase): pass
 
-class Task(Base):
-    __tablename__ = "task"
+class Calls(Base):
+    __tablename__ = "calls"
 
     id = Column(Integer, primary_key=True)
     title = Column(String)
@@ -35,17 +35,22 @@ class User(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String)
+    surname = Column(String)
     code = Column(String)
-    task = Column(Integer)
+    number_of_calls = Column(Integer)
 
     def deserialzator(self):
         des = {
             "name": self.name,
+            "surname": self.surname,
             "code": self.code,
-            "task": self.task
+            "number_of_calls": self.number_of_calls
         }
         return des
-ol = db.query(Task)
+class BaseId(BaseModel):
+    id: int | None
+    employee: str | None
+ol = db.query(Calls)
 usersUndes = db.query(User)
 users = []
 arrOfTest = []
@@ -65,7 +70,7 @@ def get_users():
     for user in users:
         print(user)
     return users
-@app.get("/api/tasks")
+@app.get("/api/cards")
 def render_main_page():
     # for test in ol:
     #     return test.deserialzator()
@@ -87,11 +92,22 @@ def test():
             "isComplete":"0",
         },
     }
+# new_test_user = User(id = 1, name="Николай", surname="Ротарь", code="hr", number_of_calls=0)
+# db.add(new_test_user)
+# db.commit()
 @app.post("/postdata")
-def form(country = Form()):
-    new_task = Task(id=14,title="New69", description=f"{country}", employee="ru")
-    db.add(new_task)
-    db.commit()
-    for elem in ol:
-        print(f"{elem.id} {elem.title}-{elem.description}")
-    return RedirectResponse("/", status_code=301)
+# employee = Form(), id = Form()
+def form(id = Body(embed=True), employee = Body(embed=True)):
+    # new_task = Task(id=14,title="New69", description=f"{employee}", employee="ru")
+    # db.add(new_task)
+    # db.commit()
+    # for elem in ol:
+    #     print(f"{elem.id} {elem.title}-{elem.description}")
+    return {"id": id, "employee": employee}
+@app.get("/test")
+def fetch(base: BaseId):
+    return {"message": f"Привет, {base.employee}, твой возраст - {base.id}"}
+
+@app.post("/test1")
+def fetch(base: BaseId):
+    return {"message": f"Привет, {base.employee}, твой возраст - {base.id}"}
