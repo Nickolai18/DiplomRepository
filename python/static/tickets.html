@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Актуальные заявки</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .none{
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <section class="section sectionMenu">
+            <div class="container containerMenu">
+                <a href="/" class="link icon"><img class="image" src="/static/image/free-icon-insurance-14207142%20(1).png" alt=""></a>
+                <a href="/tickets" class="link icon"><img class="image" src="/static/image/free-icon-history-2961948%20(1).png" alt=""></a>
+                <a href="" class="link icon"><img class="image" src="/static/image/free-icon-characteristic-12885523%20(1).png" alt=""></a>
+            </div>
+        </section>
+    </header>
+    <main>
+        <div class="">
+            <section class="section sectionCard">
+                <div class="container boxTickets">
+
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    <footer>
+        <!-- <a href="https://www.flaticon.com/ru/free-icons/" title="онлайн-заявка иконки">Онлайн-заявка иконки от Icon home - Flaticon</a> -->
+    </footer>
+    <script>
+        // let boxCard = document.querySelector(".containerCard")
+
+        function createElem(elemName, textName, className){
+            let elem = document.createElement(elemName)
+            if(textName == undefined){
+                textName = ""
+            }else{
+                elem.innerText = textName
+            }
+            if(className == undefined){
+                className = ""
+            }else{
+                elem.classList.add(className)
+            }
+            return elem
+        }
+        // function createForm(array, id){
+        //     // Создание селекта и добавление имени
+        //     let select = createElem('select')
+        //     select.name = 'employee'
+        //     for(let i = 0; i < array.length; i++){
+        //         console.log(array[i].name)
+        //         let op = createElem('option', array[i].name)
+        //         console.log(array[i].code)
+        //         op.value = array[i].code
+        //         select.append(op)
+        //     }
+        //     // Создание скрытых метаданных с id заявки 
+        //     let title = createElem('input', id, "none")
+        //     title.type = "text"
+        //     title.name = "id"
+        //     title.value = id
+        //     // Создание кнопки 
+        //     input = createElem('input', se.description, "button")
+        //     input.type = 'submit'
+        //     // Создание формы
+        //     let form = createElem('form')
+        //     form.action = '/'
+        //     form.method = 'post'
+        //     // Добавление созданных ранее тегов
+        //     form.append(title)
+        //     form.append(select)
+        //     form.append(input)
+        //     return form
+        // }
+        // function arrAddConflict(arr, users){
+        //     for(let i = 0; i < arr.length; i++){
+        //         let card = document.createElement('div')
+        //         card.classList.add("card")
+        //         se = arr[i]
+        //         // let id = createElem('div', i+1, "none")
+        //         // card.append(id)
+        //         card.append(createElem('h1', se.title, "title"))
+        //         card.append(createElem('p', se.description, "description"))
+        //         card.append(createForm(users, se.id))
+        //         boxCard.append(card)
+        //     }
+        // }
+        async function getTicketsInProgressInformation(){
+            const responseTicket = await fetch("/api/tickets", {
+                method: "GET",
+                headers: { "Accept": "application/json" }
+            });
+            let cards
+            if(responseTicket){
+                tickets = await responseTicket.json()
+            }
+            let responseUsers = await fetch("/api/users",{
+                method: "GET",
+                headers: { "Accept": "application/json" }
+            })
+            let users
+            if(responseUsers){
+                users = await responseUsers.json()
+            }
+            createUsersTicket(users, tickets)
+        }
+        // // getTasks()
+        // // getUsers().then(response => {
+        // //     let cards = document.querySelectorAll(".card")
+        // //     // .append(createSelectOption(response))
+        // //     cards.forEach(el => el.append(createForm(response)))
+        // // })
+        // // let elements = document.querySelectorAll(".card")
+        // // // .append(createSelectOption(response))
+        // // elements.forEach(el => console.log(el))
+        // // console.log(getUsers())
+        // getCardInformation()
+        
+        // let id = 1
+        // let emplo = "hr"
+        // // fetch("/test", {
+        // //     method: "POST",
+        // //     headers: { "Accept": "application/json", "Content-Type": "application/json" },
+        // //     body: JSON.stringify({
+        // //         "id": 1,
+        // //         "emplo": "hr"
+        // //     })
+        // // });
+        // let btn = document.querySelector(".btn")
+        // console.log(btn)
+        // // async function responseInput(){
+        // //     let idTicket = document.querySelector(".none")
+        // //     console.log(idTicket)
+        // //     let emplo = document.querySelector(".emplo")
+        // //     console.log(idTicket)
+        // //     const responseCard = await fetch("/tt", {
+        // //         method: "POST",
+        // //         headers: { "Accept": "application/json", "Content-Type": "application/json" },
+        // //         body: {
+        // //             "id": idTicket,
+        // //             "emplo": emplo
+        // //         }
+        // //     });
+        // //     console.log(1)
+        // //     let cards
+        // //     if(responseCard){
+        // //         cards = await responseCard.json()
+        // //     }
+        // // }
+        // // btn.addEventListener('submit', responseInput)
+        let boxTicket = document.querySelector(".boxTickets")
+
+        function createUsersTicket(arrayUsers, arrayTickets){
+            for(let user of arrayUsers){
+                let line = createElem("div", undefined, "line")
+                let contTickets = createElem("div", undefined, "containerTickets")
+                let boxUser = createElem("div", undefined, "boxUser")
+                let boxImage = createElem("div", undefined, "boxImage")
+                let cardTicketUser = createElem("div", undefined, "card")
+                cardTicketUser.classList.add("cardTicket")
+                let imageUser = document.createElement("img")
+                imageUser.classList.add("image") 
+                imageUser.classList.add("imageCard") 
+                imageUser.src = "/static/image/user.png"
+                let titleUser = createElem("p", user["name"] + " " + user["surname"], "title")
+                titleUser.classList.add("titleCard") 
+                let number_of_calls = user["number_of_calls"]
+                number_of_calls = "Количество заявок: " + number_of_calls
+                let tickets = createElem("p", number_of_calls, "tickets")
+
+                boxImage.append(imageUser)
+
+                cardTicketUser.append(boxImage)
+                cardTicketUser.append(titleUser)
+                cardTicketUser.append(tickets)
+
+                boxUser.append(cardTicketUser)
+
+                let boxTick = createElem("div", undefined, "boxTick")
+                
+                for(let ticket of arrayTickets){
+                    let cardTicket = createElem("div", undefined, "card")
+                    cardTicket.classList.add("cardTicket")
+                    let numberAud = createElem("span", ticket["title"], "numberAud")
+                    let describtion = createElem("div", ticket["description"], "describtion")
+                    let marker = createElem("div", undefined, "marker")
+                    let wingLeft = createElem("div", undefined, "wing")
+                    let wingRight = createElem("div", undefined, "wing")
+                    wingLeft.classList.add("wingLeft")
+                    wingRight.classList.add("wingRight")
+                    if(ticket["critical"] == 1){
+                        marker.classList.add("marker-critical-1")
+                        wingLeft.classList.add("marker-critical-1")
+                        wingRight.classList.add("marker-critical-1")
+                    }
+                    if(ticket["critical"] == 2){
+                        marker.classList.add("marker-critical-2")
+                        wingLeft.classList.add("marker-critical-2")
+                        wingRight.classList.add("marker-critical-2")
+                    }
+                    marker.append(wingLeft)
+                    marker.append(wingRight)
+
+                    cardTicket.append(numberAud)
+                    cardTicket.append(describtion)
+                    cardTicket.append(marker)
+
+                    boxTick.append(cardTicket)
+
+                }
+
+                contTickets.append(boxUser)
+                contTickets.append(boxTick)
+                contTickets.before(line)
+
+                boxTicket.append(contTickets)
+
+            }
+        }
+        getTicketsInProgressInformation()
+    </script>
+</body>
+</html>

@@ -7,6 +7,7 @@
 :root{
     --colorMain: #000050;
     --borderMain: 7px;
+    --colorCard: whitesmoke;
 }
 .link{
     color: white;
@@ -79,13 +80,14 @@ body{
     margin-left: 1vw;
 }
 .card{
-    width: 14.6%;
+    width: 200px;
     height: 300px;
     background-color: whitesmoke;
     padding: 15px;
     border-radius: var(--borderMain);
     display: flex;
-    justify-content: space-around;
+    justify-content: space-evenly;
+    align-items:center;
     flex-direction: column;
     margin-left: 10px;
     margin-right: 10px;
@@ -100,4 +102,107 @@ body{
 }
 .buttonCard{
     align-self: end;
+}
+/*TICKETS*/
+.sectionTickets{
+    width: 99vw!important;
+}
+.boxTickets{
+    display: flex;
+    flex-direction: column;
+}
+.containerTickets{
+    height: 340px;
+    display: flex;
+    margin-left: 8px;
+    margin-top: 18px;
+    margin-bottom: 20px;
+    flex-direction: row;
+}
+.cardUser{
+    width: 200px;
+}
+.boxTick{
+    width: 85%;
+    display: flex;
+    flex-direction: row;
+    overflow-x: scroll;
+    overflow-y: none;
+    padding: 5px;
+}
+.boxUser{
+    width: 10%;
+    margin-right: 5%;
+    margin-top: 5px;
+}
+.cardUser{
+    min-width: 200px;
+}
+.cardTicket{
+    min-width: 200px;
+    margin-bottom: 0px;
+    position: relative;
+}
+.marker{
+    width: 30px;
+    height: 30px;
+    background-color: var(--colorMain);
+    position: absolute;
+    top: 0px;
+    left: 140px;
+}
+.wing{
+    width: 15px;
+    height: 15px;
+    background-color: var(--colorMain);
+    position: absolute;
+    top: 30px;
+}
+.marker::after{
+    content: '';
+    width: 30px;
+    height: 30px;
+    background-color: var(--colorCard);
+    position: absolute;
+    top: 36px;
+    transform: rotate(45deg);
+    z-index: 4;
+}
+.wingLeft{
+    left: 0px;
+}
+.wingRight{
+    left: 15px;
+}
+.boxImage{
+    width: 150px;
+    height: 150px;
+}
+.imageCard{
+    width: 150px;
+    height: 150px;
+}
+.tickets{
+    align-self: self-start;
+}
+.titleCard{
+    color: rgb(0, 0, 122);
+}
+.line{
+    width: 75%;
+    height: 5px;
+    border-radius: 30px;
+    background-color: rgb(216, 216, 216);
+    padding: 2px;
+    align-self: center;
+    box-shadow: 0px 1px 15px;
+}
+.title{
+    font-size: 20px;
+}
+.description{
+    text-align: center;
+}
+.numberAud{
+    z-index: 5;
 }

@@ -15,8 +15,8 @@
     <header>
         <section class="section sectionMenu">
             <div class="container containerMenu">
-                <a href="" class="link icon"><img class="image" src="/static/image/free-icon-insurance-14207142%20(1).png" alt=""></a>
-                <a href="" class="link icon"><img class="image" src="/static/image/free-icon-history-2961948%20(1).png" alt=""></a>
+                <a href="/" class="link icon"><img class="image" src="/static/image/free-icon-insurance-14207142%20(1).png" alt=""></a>
+                <a href="/tickets" class="link icon"><img class="image" src="/static/image/free-icon-history-2961948%20(1).png" alt=""></a>
                 <a href="" class="link icon"><img class="image" src="/static/image/free-icon-characteristic-12885523%20(1).png" alt=""></a>
             </div>
         </section>
@@ -26,7 +26,7 @@
             <section class="section sectionCard">
                 <div class="container boxCard">
                     <div class="containerCard">
-                        
+
                     </div>
                 </div>
             </section>
@@ -64,15 +64,16 @@
                 select.append(op)
             }
             // Создание скрытых метаданных с id заявки 
-            let title = createElem('div', id, "none")
-            // title.type = "text"
+            let title = createElem('input', id, "none")
+            title.type = "text"
             title.name = "id"
+            title.value = id
             // Создание кнопки 
             input = createElem('input', se.description, "button")
             input.type = 'submit'
             // Создание формы
             let form = createElem('form')
-            form.action = 'postdata'
+            form.action = '/'
             form.method = 'post'
             // Добавление созданных ранее тегов
             form.append(title)
@@ -84,12 +85,25 @@
             for(let i = 0; i < arr.length; i++){
                 let card = document.createElement('div')
                 card.classList.add("card")
+                let marker = createElem("div", undefined, "marker")
+                let wingLeft = createElem("div", undefined, "wing")
+                let wingRight = createElem("div", undefined, "wing")
+                wingLeft.classList.add("wingLeft")
+                wingRight.classList.add("wingRight")
                 se = arr[i]
                 // let id = createElem('div', i+1, "none")
                 // card.append(id)
+                if(se.critical == 2){
+                    marker.classList.add("marker-critical-2")
+                    wingLeft.classList.add("marker-critical-2")
+                    wingRight.classList.add("marker-critical-2")
+                    marker.append(wingLeft)
+                    marker.append(wingRight)
+                    card.append(marker)
+                }
                 card.append(createElem('h1', se.title, "title"))
                 card.append(createElem('p', se.description, "description"))
-                card.append(createForm(users, i+1))
+                card.append(createForm(users, se.id))
                 boxCard.append(card)
             }
         }
@@ -123,14 +137,39 @@
         // elements.forEach(el => console.log(el))
         // console.log(getUsers())
         getCardInformation()
-        const responseCard = fetch("/test", {
-            method: "POST",
-            headers: { "Accept": "application/json" },
-            body: JSON.stringify({
-                "id": 1,
-                "employee": "hr"
-            })
-        });
+        
+        let id = 1
+        let emplo = "hr"
+        // fetch("/test", {
+        //     method: "POST",
+        //     headers: { "Accept": "application/json", "Content-Type": "application/json" },
+        //     body: JSON.stringify({
+        //         "id": 1,
+        //         "emplo": "hr"
+        //     })
+        // });
+        let btn = document.querySelector(".btn")
+        console.log(btn)
+        // async function responseInput(){
+        //     let idTicket = document.querySelector(".none")
+        //     console.log(idTicket)
+        //     let emplo = document.querySelector(".emplo")
+        //     console.log(idTicket)
+        //     const responseCard = await fetch("/tt", {
+        //         method: "POST",
+        //         headers: { "Accept": "application/json", "Content-Type": "application/json" },
+        //         body: {
+        //             "id": idTicket,
+        //             "emplo": emplo
+        //         }
+        //     });
+        //     console.log(1)
+        //     let cards
+        //     if(responseCard){
+        //         cards = await responseCard.json()
+        //     }
+        // }
+        // btn.addEventListener('submit', responseInput)
     </script>
 </body>
 </html>

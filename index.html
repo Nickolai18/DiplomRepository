@@ -573,52 +573,53 @@
     <footer>
         <!-- <a href="https://www.flaticon.com/ru/free-icons/" title="онлайн-заявка иконки">Онлайн-заявка иконки от Icon home - Flaticon</a> -->
     </footer>
-    <script>async function getUsers() {
-             const response = await fetch("/api/users", {
-                method: "GET",
-                headers: { "Accept": "application/json" }
-             });
-                // если запрос прошел нормально
-             if (response.ok === true) {
-                // получаем данные
-                    const users = await response.json();
-                    return users
-                    // cards = document.querySelectorAll(".card")
-                    // for(let i = 0; i < cards.lenght; i++){
-                    // console.log(i)
-                    //     cards[i].append(createSelectOption(users))
-                    // }
-                    // boxCard.append(createSelectOption(users))
-             }
-        }
-        async function getTasks() {
-            // отправляет запрос и получаем ответ
-            const response = await fetch("/api/cards", {
-                method: "GET",
-                headers: { "Accept": "application/json" }
-            });
-            // если запрос прошел нормально
-            if (response.ok === true) {
-                // получаем данные
-                const tasks = await response.json();
-                arrAddConflict(tasks)
-                // getUsers().then(response => {
-                //     let elements = document.querySelectorAll(".card")
-                //     console.log(elements)
-                //     // .append(createSelectOption(response))
-                //     elements.forEach(el => console.log(el))
-                // })
-<!--                console.log(tasks)-->
-            }
-        }
-        let cards = document.querySelectorAll(".card")
-        console.log(cards)
-        for(let i in cards){
-            console.log(i)
-        }
-        for(let i = 0; i < cards.lenght; i++){
-            console.log(cards[i])
-        }
+    <script>
+//     async function getUsers() {
+//              const response = await fetch("/api/users", {
+//                 method: "GET",
+//                 headers: { "Accept": "application/json" }
+//              });
+//                 // если запрос прошел нормально
+//              if (response.ok === true) {
+//                 // получаем данные
+//                     const users = await response.json();
+//                     return users
+//                     // cards = document.querySelectorAll(".card")
+//                     // for(let i = 0; i < cards.lenght; i++){
+//                     // console.log(i)
+//                     //     cards[i].append(createSelectOption(users))
+//                     // }
+//                     // boxCard.append(createSelectOption(users))
+//              }
+//         }
+//         async function getTasks() {
+//             // отправляет запрос и получаем ответ
+//             const response = await fetch("/api/cards", {
+//                 method: "GET",
+//                 headers: { "Accept": "application/json" }
+//             });
+//             // если запрос прошел нормально
+//             if (response.ok === true) {
+//                 // получаем данные
+//                 const tasks = await response.json();
+//                 arrAddConflict(tasks)
+//                 // getUsers().then(response => {
+//                 //     let elements = document.querySelectorAll(".card")
+//                 //     console.log(elements)
+//                 //     // .append(createSelectOption(response))
+//                 //     elements.forEach(el => console.log(el))
+//                 // })
+// <!--                console.log(tasks)-->
+//             }
+//         }
+//         let cards = document.querySelectorAll(".card")
+//         console.log(cards)
+//         for(let i in cards){
+//             console.log(i)
+//         }
+//         for(let i = 0; i < cards.lenght; i++){
+//             console.log(cards[i])
+//         }
     </script>
 </body>
 </html>
