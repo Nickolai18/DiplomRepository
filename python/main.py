@@ -8,6 +8,8 @@ from pydantic import BaseModel
 from bd import SessionLocal
 from datetime import datetime
 
+from validation import wordValidation
+
 SQLALCHEMY_DATABASE_URL = "mysql://root:root@127.0.0.1:3306/calls"
 engine=create_engine(SQLALCHEMY_DATABASE_URL)
 
@@ -23,6 +25,7 @@ class Calls(Base):
     title = Column(String)
     description = Column(String)
     employee = Column(String, default='')
+    secondary_employee = Column(String, default='')
     create_date = Column(DateTime)
     confirm_date = Column(DateTime)
     critical = Column(Integer)
@@ -33,6 +36,8 @@ class Calls(Base):
             "title": self.title,
             "description": self.description,
             "employee": self.employee,
+            "employee": self.employee,
+            "secondary_employee": self.secondary_employee,
             "critical": self.critical,
             "create_date": self.create_date,
             "confirm_date": self.confirm_date
@@ -47,13 +52,15 @@ class User(Base):
     surname = Column(String)
     code = Column(String)
     number_of_calls = Column(Integer)
+    current_calls = Column(Integer)
 
     def deserialzator(self):
         des = {
             "name": self.name,
             "surname": self.surname,
             "code": self.code,
-            "number_of_calls": self.number_of_calls
+            "number_of_calls": self.number_of_calls,
+            "current_calls": self.current_calls
         }
         return des
 class BaseId(BaseModel):
@@ -61,6 +68,16 @@ class BaseId(BaseModel):
     employee: str | None
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"))
+
+def getAllUser():
+    usersUndes = db.query(User)
+    users = []
+    for user in usersUndes:
+        users.append(user.deserialzator())
+    for user in users:
+        print(user)
+    return users
+
 # Загрузка главной проблемы(страницы)
 @app.get("/")
 def render_main_index():
@@ -73,13 +90,7 @@ def render_tickets():
 
 @app.get("/api/users")
 def get_users():
-    usersUndes = db.query(User)
-    users = []
-    for user in usersUndes:
-        users.append(user.deserialzator())
-    for user in users:
-        print(user)
-    return users
+    return getAllUser()
 
 @app.get("/api/cards")
 def render_main_page():
@@ -88,10 +99,16 @@ def render_main_page():
     for elem in ol:
         print(elem.deserialzator())
         calls = elem.deserialzator()
-        print(calls["employee"])
-        if calls["employee"] == "":
-            arrOfTest.append(elem.deserialzator())
+        # print(calls["employee"])
+        print(calls["secondary_employee"])
+        if (calls["employee"] == "" or calls["secondary_employee"] == "") or calls["employee"] != "" or calls["secondary_employee"] == "":
+        # if calls["employee"] == "":
+            if wordValidation(calls["description"]):
+                arrOfTest.append(elem.deserialzator())
     return arrOfTest
+
+
+
 @app.get("/api/tickets")
 def render_tickets_page():
     ol = db.query(Calls)
@@ -105,7 +122,7 @@ def render_tickets_page():
         delta = int(delta.days)
         print(elem.deserialzator())
         print(calls["employee"])
-        if calls["employee"] != "":
+        if calls["employee"] != "" and calls["secondary_employee"] == None or calls["employee"] != "" and calls["secondary_employee"] != "":
             arrOfTest.append(elem.deserialzator())
         if calls["critical"] == 0 and delta > 3:
             calls["critical"] = 1
@@ -118,12 +135,30 @@ def render_tickets_page():
 
     return arrOfTest
 
+
+
 @app.post("/")
 def form(id = Form(), employee = Form()):
     now = datetime.now()
     nowMySQL = now.strftime("%Y-%m-%d %H:%M:%S")
-    user = db.query(User).filter(User.code == employee).first()
-    user.number_of_calls = user.number_of_calls + 1
+    if employee == 'auto':
+        print(employee)
+        usersTo = getAllUser()
+        smallestTicket = 100000000
+        userCodeSmallest = ''
+        for user in usersTo:
+            if user["current_calls"] < smallestTicket:
+                smallestTicket = user["current_calls"]
+                userCodeSmallest = user["code"]
+        print(userCodeSmallest)
+        user = db.query(User).filter(User.code == userCodeSmallest).first()
+        user.number_of_calls = user.number_of_calls + 1
+        user.current_calls = user.current_calls + 1
+        employee = userCodeSmallest
+    else:
+        user = db.query(User).filter(User.code == employee).first()
+        user.number_of_calls = user.number_of_calls + 1
+        user.current_calls = user.current_calls + 1
     call = db.query(Calls).filter(Calls.id == id).first()
     call.employee = employee
     call.confirm_date = nowMySQL
@@ -131,4 +166,23 @@ def form(id = Form(), employee = Form()):
     db.commit()
     return FileResponse("static/index.html")
 
+@app.post("/tickets")
+def form_tickets(id = Form()):
+    call = db.query(Calls).filter(Calls.id == id).first()
+    user = db.query(User).filter(User.code == call.employee).first()
+    user.current_calls -= 1
+    call.employee = ''
+    print("first")
+    db.commit()
+    return FileResponse("static/tickets.html")
+
+@app.post("/tickets/addnewuser")
+def form_add_new_user(id = Form()):
+    call = db.query(Calls).filter(Calls.id == id).first()
+    user = db.query(User).filter(User.code == call.employee).first()
+    user.current_calls = user.current_calls + 1
+    call.secondary_employee = ''
+    print("second")
+    db.commit()
+    return FileResponse("static/tickets.html")
 

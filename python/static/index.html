@@ -56,6 +56,9 @@
             // Создание селекта и добавление имени
             let select = createElem('select')
             select.name = 'employee'
+            let op = createElem('option', 'Автоматически')
+            op.value = 'auto'
+            select.append(op)
             for(let i = 0; i < array.length; i++){
                 console.log(array[i].name)
                 let op = createElem('option', array[i].name)
@@ -99,8 +102,22 @@
                     wingRight.classList.add("marker-critical-2")
                     marker.append(wingLeft)
                     marker.append(wingRight)
+                    if(se["secondary_employee"] == ''){
+                        marker.classList.add('plus')
+                    }
+                    card.append(marker)
+                }else if(se.critical == 1){
+                    marker.classList.add("marker-critical-1")
+                    wingLeft.classList.add("marker-critical-1")
+                    wingRight.classList.add("marker-critical-1")
+                    marker.append(wingLeft)
+                    marker.append(wingRight)
+                    if(se["secondary_employee"] == ''){
+                        marker.classList.add('plus')
+                    }
                     card.append(marker)
                 }
+
                 card.append(createElem('h1', se.title, "title"))
                 card.append(createElem('p', se.description, "description"))
                 card.append(createForm(users, se.id))

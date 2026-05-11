@@ -47,6 +47,12 @@ body{
 .marker-critical-2{
     background-color: rgb(201, 21, 21)!important;
 }
+.plus{
+    background-image: url(./image/plus.png);
+    background-size: 23px 23px;
+    background-position: center;
+    background-repeat: no-repeat;
+}
 /*Header*/
 .sectionMenu{
     width: 10vw;
@@ -225,4 +231,10 @@ body{
 }
 .numberAud{
     z-index: 5;
+}
+.boxForm{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
 }

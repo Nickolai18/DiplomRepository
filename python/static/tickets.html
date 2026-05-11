@@ -156,7 +156,28 @@
         // //     }
         // // }
         // // btn.addEventListener('submit', responseInput)
+
         let boxTicket = document.querySelector(".boxTickets")
+
+        function createForm(id, method, action, value){
+            // Создание скрытых метаданных с id заявки 
+            let title = createElem('input', id, "none")
+            title.type = "text"
+            title.name = "id"
+            title.value = id
+            // Создание кнопки 
+            input = createElem('input', undefined, "button")
+            input.type = 'submit'
+            input.value = value
+            // Создание формы
+            let form = createElem('form')
+            form.action = action
+            form.method = method
+            // Добавление созданных ранее тегов
+            form.append(title)
+            form.append(input)
+            return form
+        }
 
         function createUsersTicket(arrayUsers, arrayTickets){
             for(let user of arrayUsers){
@@ -183,38 +204,98 @@
                 cardTicketUser.append(tickets)
 
                 boxUser.append(cardTicketUser)
+                console.log(1)
 
                 let boxTick = createElem("div", undefined, "boxTick")
                 
                 for(let ticket of arrayTickets){
-                    let cardTicket = createElem("div", undefined, "card")
-                    cardTicket.classList.add("cardTicket")
-                    let numberAud = createElem("span", ticket["title"], "numberAud")
-                    let describtion = createElem("div", ticket["description"], "describtion")
-                    let marker = createElem("div", undefined, "marker")
-                    let wingLeft = createElem("div", undefined, "wing")
-                    let wingRight = createElem("div", undefined, "wing")
-                    wingLeft.classList.add("wingLeft")
-                    wingRight.classList.add("wingRight")
-                    if(ticket["critical"] == 1){
-                        marker.classList.add("marker-critical-1")
-                        wingLeft.classList.add("marker-critical-1")
-                        wingRight.classList.add("marker-critical-1")
+                        // console.log(user["code"])
+                        // console.log(ticket["code"])
+                        // let cardTicket = createElem("div", undefined, "card")
+                        // cardTicket.classList.add("cardTicket")
+                        // let numberAud = createElem("span", ticket["title"], "numberAud")
+                        // let describtion = createElem("div", ticket["description"], "describtion")
+                        // let marker = createElem("div", undefined, "marker")
+                        // let wingLeft = createElem("div", undefined, "wing")
+                        // let wingRight = createElem("div", undefined, "wing")
+                        // wingLeft.classList.add("wingLeft")
+                        // wingRight.classList.add("wingRight")
+                        // if(ticket["critical"] == 1){
+                        //     marker.classList.add("marker-critical-1")
+                        //     wingLeft.classList.add("marker-critical-1")
+                        //     wingRight.classList.add("marker-critical-1")
+                        // }
+                        // if(ticket["critical"] == 2){
+                        //     marker.classList.add("marker-critical-2")
+                        //     wingLeft.classList.add("marker-critical-2")
+                        //     wingRight.classList.add("marker-critical-2")
+                        // }
+                        // marker.append(wingLeft)
+                        // marker.append(wingRight)
+                        // console.log(ticket["id"])
+                        // cardTicket.append(numberAud)
+                        // cardTicket.append(describtion)
+                        // cardTicket.append(marker)
+                        // cardTicket.append(createForm(ticket["id"]))
+                        
+                        
+                        // if(ticket["critical"] != 0){
+                        //     boxTick.prepend(cardTicket)
+                        // }else{
+                        //     boxTick.append(cardTicket)
+                        // }
+                    // let i = 1
+                    if(ticket["employee"] == user["code"]){
+                        console.log(user["code"])
+                        console.log(ticket["code"])
+                        let cardTicket = createElem("div", undefined, "card")
+                        cardTicket.classList.add("cardTicket")
+                        let numberAud = createElem("span", ticket["title"], "numberAud")
+                        let describtion = createElem("div", ticket["description"], "describtion")
+                        let boxForm = createElem("div", undefined, "boxForm")
+                        let marker = createElem("div", undefined, "marker")
+                        let wingLeft = createElem("div", undefined, "wing")
+                        let wingRight = createElem("div", undefined, "wing")
+                        wingLeft.classList.add("wingLeft")
+                        wingRight.classList.add("wingRight")
+                        if(ticket["critical"] == 1){
+                            marker.classList.add("marker-critical-1")
+                            wingLeft.classList.add("marker-critical-1")
+                            wingRight.classList.add("marker-critical-1")
+                        }
+                        if(ticket["critical"] == 2){
+                            marker.classList.add("marker-critical-2")
+                            wingLeft.classList.add("marker-critical-2")
+                            wingRight.classList.add("marker-critical-2")
+                        }
+                        marker.append(wingLeft)
+                        marker.append(wingRight)
+
+                        console.log(ticket["secondary_employee"])
+                        if(ticket["secondary_employee"] != '' | ticket["secondary_employee"] == null){
+                            marker.classList.add('plus')
+                        }
+
+                        console.log(ticket["id"])
+
+                        boxForm.append(createForm(ticket["id"], 'post', '/tickets', 'Изменить сотрудника'))
+                        boxForm.append(createForm(ticket["id"], 'post', '/tickets/addnewuser', 'Добавить сотрудника'))
+
+                        cardTicket.append(numberAud)
+                        cardTicket.append(describtion)
+                        cardTicket.append(marker)
+                        cardTicket.append(boxForm)
+                        
+                        if(ticket["critical"] != 0){
+                            boxTick.prepend(cardTicket)
+                        }else{
+                            boxTick.append(cardTicket)
+                        }
                     }
-                    if(ticket["critical"] == 2){
-                        marker.classList.add("marker-critical-2")
-                        wingLeft.classList.add("marker-critical-2")
-                        wingRight.classList.add("marker-critical-2")
+                    else{
+                        console.log('No')
+                        continue
                     }
-                    marker.append(wingLeft)
-                    marker.append(wingRight)
-
-                    cardTicket.append(numberAud)
-                    cardTicket.append(describtion)
-                    cardTicket.append(marker)
-
-                    boxTick.append(cardTicket)
-
                 }
 
                 contTickets.append(boxUser)
