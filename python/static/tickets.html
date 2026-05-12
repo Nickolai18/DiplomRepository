@@ -272,7 +272,8 @@
                         marker.append(wingRight)
 
                         console.log(ticket["secondary_employee"])
-                        if(ticket["secondary_employee"] != '' | ticket["secondary_employee"] == null){
+                        if(ticket["secondary_employee"] == null){
+                        }else{
                             marker.classList.add('plus')
                         }
 

@@ -1,8 +1,8 @@
 from fastapi import FastAPI, Form, Body
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import create_engine, Column, Integer, String, DateTime
-from sqlalchemy.orm import DeclarativeBase, sessionmaker
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy.orm import DeclarativeBase, sessionmaker, relationship
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from bd import SessionLocal
@@ -26,10 +26,10 @@ class Calls(Base):
     description = Column(String)
     employee = Column(String, default='')
     secondary_employee = Column(String, default='')
-    create_date = Column(DateTime)
-    confirm_date = Column(DateTime)
     critical = Column(Integer)
     time_to_complete = Column(Integer)
+    # sla = relationship("SLA", uselist=False, back_populates="ticket")
+
     def deserialzator(self):
         des = {
             "id": self.id,
@@ -39,8 +39,6 @@ class Calls(Base):
             "employee": self.employee,
             "secondary_employee": self.secondary_employee,
             "critical": self.critical,
-            "create_date": self.create_date,
-            "confirm_date": self.confirm_date
         }
         return des
     
@@ -63,6 +61,26 @@ class User(Base):
             "current_calls": self.current_calls
         }
         return des
+class SLA(Base):
+    __tablename__ = "sla"
+
+    idSLA = Column(Integer, primary_key=True, autoincrement=True)
+    create_date = Column(DateTime)
+    confirm_date = Column(DateTime)
+    add_another_employee = Column(DateTime)
+    add_new_employee = Column(DateTime)
+    id_ticket = Column(DateTime, ForeignKey("calls.id"))
+    # ticket = relationship("User", back_populates="sla")
+
+    def deserialzator(self):
+        des = {
+            "create_date": self.create_date,
+            "confirm_date": self.confirm_date,
+            "add_another_employee": self.add_another_employee,
+            "add_new_employee": self.add_new_employee,
+        }
+        return des
+
 class BaseId(BaseModel):
     id: int | None
     employee: str | None
@@ -101,8 +119,8 @@ def render_main_page():
         calls = elem.deserialzator()
         # print(calls["employee"])
         print(calls["secondary_employee"])
-        if (calls["employee"] == "" or calls["secondary_employee"] == "") or calls["employee"] != "" or calls["secondary_employee"] == "":
-        # if calls["employee"] == "":
+        # if (calls["employee"] == "" and calls["secondary_employee"] == None) or (calls["employee"] != "" or calls["secondary_employee"] == ""):
+        if calls["employee"] == "" or calls["secondary_employee"] == '':
             if wordValidation(calls["description"]):
                 arrOfTest.append(elem.deserialzator())
     return arrOfTest
@@ -115,14 +133,15 @@ def render_tickets_page():
     arrOfTest = []
     for elem in ol:
         calls = elem.deserialzator()
-        print(calls["create_date"])
-        print(calls["confirm_date"])
-        delta = calls["confirm_date"] - calls["create_date"]
+        sla = db.query(SLA).filter(SLA.id_ticket == calls["id"]).first()
+        delta = sla.confirm_date - sla.create_date
+        # print(sla["create_date"])
+        # print(sla["confirm_date"])
         print(delta.days)
         delta = int(delta.days)
         print(elem.deserialzator())
         print(calls["employee"])
-        if calls["employee"] != "" and calls["secondary_employee"] == None or calls["employee"] != "" and calls["secondary_employee"] != "":
+        if (calls["employee"] != "" and calls["secondary_employee"] == None) or (calls["employee"] != "" and calls["secondary_employee"] != ""):
             arrOfTest.append(elem.deserialzator())
         if calls["critical"] == 0 and delta > 3:
             calls["critical"] = 1
@@ -141,48 +160,90 @@ def render_tickets_page():
 def form(id = Form(), employee = Form()):
     now = datetime.now()
     nowMySQL = now.strftime("%Y-%m-%d %H:%M:%S")
-    if employee == 'auto':
-        print(employee)
-        usersTo = getAllUser()
-        smallestTicket = 100000000
-        userCodeSmallest = ''
-        for user in usersTo:
-            if user["current_calls"] < smallestTicket:
-                smallestTicket = user["current_calls"]
-                userCodeSmallest = user["code"]
-        print(userCodeSmallest)
-        user = db.query(User).filter(User.code == userCodeSmallest).first()
-        user.number_of_calls = user.number_of_calls + 1
-        user.current_calls = user.current_calls + 1
-        employee = userCodeSmallest
-    else:
-        user = db.query(User).filter(User.code == employee).first()
-        user.number_of_calls = user.number_of_calls + 1
-        user.current_calls = user.current_calls + 1
     call = db.query(Calls).filter(Calls.id == id).first()
-    call.employee = employee
-    call.confirm_date = nowMySQL
-    call.time_to_complete = 3
+    secondary_employee = call.secondary_employee
+    if secondary_employee == None:
+        if employee == 'auto':
+            print(employee)
+            usersTo = getAllUser()
+            smallestTicket = 100000000
+            userCodeSmallest = ''
+            for user in usersTo:
+                if user["current_calls"] < smallestTicket:
+                    smallestTicket = user["current_calls"]
+                    userCodeSmallest = user["code"]
+            print(userCodeSmallest)
+            user = db.query(User).filter(User.code == userCodeSmallest).first()
+            user.number_of_calls = user.number_of_calls + 1
+            user.current_calls = user.current_calls + 1
+            employee = userCodeSmallest
+        else:
+            user = db.query(User).filter(User.code == employee).first()
+            user.number_of_calls = user.number_of_calls + 1
+            user.current_calls = user.current_calls + 1
+        sla = db.query(SLA).filter(SLA.id_ticket == id).first()
+        print(sla.deserialzator())
+        call.employee = employee
+        if sla.confirm_date != '':
+            sla.add_new_employee = nowMySQL
+        else:
+            sla.confirm_date = nowMySQL
+        call.time_to_complete = 3
+    elif secondary_employee == '':
+        if employee == 'auto':
+            print(employee)
+            usersTo = getAllUser()
+            smallestTicket = 100000000
+            userCodeSmallest = ''
+            for user in usersTo:
+                if user["current_calls"] < smallestTicket:
+                    smallestTicket = user["current_calls"]
+                    userCodeSmallest = user["code"]
+            print(userCodeSmallest)
+            user = db.query(User).filter(User.code == userCodeSmallest).first()
+            user.number_of_calls = user.number_of_calls + 1
+            user.current_calls = user.current_calls + 1
+            employee = userCodeSmallest
+        else:
+            user = db.query(User).filter(User.code == employee).first()
+            user.number_of_calls = user.number_of_calls + 1
+            user.current_calls = user.current_calls + 1
+        sla = db.query(SLA).filter(SLA.id_ticket == id).first()
+        call.employee = employee
+        if sla.confirm_date != '':
+            sla.add_another_employee = nowMySQL
+        else:
+            sla.confirm_date = nowMySQL
+        call.time_to_complete = 7
     db.commit()
     return FileResponse("static/index.html")
 
+# Изменить сотрудника
 @app.post("/tickets")
 def form_tickets(id = Form()):
+    # Записывает текущее время в переменную
+    now = datetime.now()
+    # Вытягивание соответствующих строк
     call = db.query(Calls).filter(Calls.id == id).first()
     user = db.query(User).filter(User.code == call.employee).first()
+    # Измениние соответствующих строк
     user.current_calls -= 1
     call.employee = ''
-    print("first")
+    # Сохранение соответствующих строк
     db.commit()
+    # Возвращение на страницу
     return FileResponse("static/tickets.html")
 
+# Добавить дополнительного сотрудника
 @app.post("/tickets/addnewuser")
 def form_add_new_user(id = Form()):
+    # Записывает текущее время в переменную
+    now = datetime.now()
+    # Вытягивание соответствующих строк
     call = db.query(Calls).filter(Calls.id == id).first()
-    user = db.query(User).filter(User.code == call.employee).first()
-    user.current_calls = user.current_calls + 1
+    # Измениние соответствующих строк
     call.secondary_employee = ''
-    print("second")
+    # Сохранение соответствующих строк
     db.commit()
     return FileResponse("static/tickets.html")
 
