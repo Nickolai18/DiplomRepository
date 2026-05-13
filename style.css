@@ -229,3 +229,24 @@ body{
 .numberAud{
     z-index: 5;
 }
+/*AVG*/
+.boxAvg{
+    display: flex;
+    flex-direction: column;
+    padding: 18px;
+    align-items: center;
+}
+.containerAvg{
+    width: 80%;
+    display: flex;
+    flex-direction: row;
+    padding: 18px;  
+    justify-content: space-between;
+}
+.titleAvg{
+    align-self: center;
+    font-size: 30px;
+}
+.avgTime{
+    font-size: 50px;
+}

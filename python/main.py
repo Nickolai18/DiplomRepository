@@ -87,6 +87,10 @@ class BaseId(BaseModel):
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"))
 
+def countAvg(start, cancel):
+    delta = cancel - start
+    return delta.total_seconds() / 3600
+
 def getAllUser():
     usersUndes = db.query(User)
     users = []
@@ -105,6 +109,10 @@ def render_main_index():
 @app.get("/tickets")
 def render_tickets():
     return FileResponse("static/tickets.html")
+
+@app.get("/analise")
+def render_average():
+    return FileResponse("static/analise.html")
 
 @app.get("/api/users")
 def get_users():
@@ -154,6 +162,30 @@ def render_tickets_page():
 
     return arrOfTest
 
+@app.get("/api/average")
+def average():
+    sla = db.query(SLA)
+    arrSla = []
+    arrAvgSla = []
+    confirm_date = 0
+    add_another_employee = 0
+    add_new_employee = 0
+    for elem in sla:
+        arrSla.append(elem.deserialzator())
+    for elem in arrSla:
+        confirm_date += countAvg(elem["create_date"], elem["confirm_date"])
+        add_another_employee += countAvg(elem["create_date"], elem["add_another_employee"])
+        add_new_employee += countAvg(elem["create_date"], elem["add_new_employee"])
+    print(confirm_date)
+    print(add_another_employee)
+    print(add_new_employee)
+    arrAvgSla.append(round(confirm_date / len(arrSla), 1))
+    arrAvgSla.append(round(add_another_employee / len(arrSla), 1))
+    arrAvgSla.append(round(add_new_employee / len(arrSla), 1))
+    print(arrAvgSla)
+    return arrAvgSla
+
+
 
 
 @app.post("/")
@@ -163,6 +195,7 @@ def form(id = Form(), employee = Form()):
     call = db.query(Calls).filter(Calls.id == id).first()
     secondary_employee = call.secondary_employee
     if secondary_employee == None:
+        print("first")
         if employee == 'auto':
             print(employee)
             usersTo = getAllUser()
@@ -190,6 +223,7 @@ def form(id = Form(), employee = Form()):
             sla.confirm_date = nowMySQL
         call.time_to_complete = 3
     elif secondary_employee == '':
+        print("second")
         if employee == 'auto':
             print(employee)
             usersTo = getAllUser()
@@ -209,7 +243,7 @@ def form(id = Form(), employee = Form()):
             user.number_of_calls = user.number_of_calls + 1
             user.current_calls = user.current_calls + 1
         sla = db.query(SLA).filter(SLA.id_ticket == id).first()
-        call.employee = employee
+        call.secondary_employee = employee
         if sla.confirm_date != '':
             sla.add_another_employee = nowMySQL
         else:
@@ -228,7 +262,11 @@ def form_tickets(id = Form()):
     user = db.query(User).filter(User.code == call.employee).first()
     # Измениние соответствующих строк
     user.current_calls -= 1
-    call.employee = ''
+    if call.secondary_employee == None:
+        call.employee = ''
+    else:
+        call.employee = call.secondary_employee
+        call.secondary_employee = None
     # Сохранение соответствующих строк
     db.commit()
     # Возвращение на страницу
@@ -246,4 +284,5 @@ def form_add_new_user(id = Form()):
     # Сохранение соответствующих строк
     db.commit()
     return FileResponse("static/tickets.html")
+
 

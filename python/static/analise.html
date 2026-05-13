@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Метрики</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <section class="section sectionMenu">
+            <div class="container containerMenu">
+                <a href="/" class="link icon"><img class="image" src="/static/image/free-icon-insurance-14207142%20(1).png" alt=""></a>
+                <a href="/tickets" class="link icon"><img class="image" src="/static/image/free-icon-characteristic-12885523%20(1).png" alt=""></a>
+                <a href="/analise" class="link icon"><img class="image" src="/static/image/free-icon-history-2961948%20(1).png" alt=""></a>
+            </div>
+        </section>
+    </header>
+    <main>
+        <div class="">
+            <section class="section sectionCard">
+                <div class="container boxAvg">
+                    <h1 class="title titleAvg"> Среднее время управления заявками</h1>
+                    <div class="containerAvg">
+                        <div class="boxTimeConfirm">
+                            <h3>Среднее время принятия заявки в оборот</h3>
+                            <h2><span class="avgTime avgTimeConfirm"></span> часов</h2>
+                        </div>
+                        <div class="boxTimeAddNewEmployer">
+                            <h3>Среднее время изменения сотрудника</h3>
+                            <h2><span class="avgTime avgTimeAddNewEmployer"></span> часов</h2>
+                        </div>
+                        <div class="boxTimeAnotherNewEmployer">
+                            <h3>Среднее время добавления дополнительного сотрудника</h3>
+                            <h2><span class="avgTime avgTimeAnotherNewEmployer"></span> часов</h2>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    <footer>
+        <!-- <a href="https://www.flaticon.com/ru/free-icons/" title="онлайн-заявка иконки">Онлайн-заявка иконки от Icon home - Flaticon</a> -->
+    </footer>
+    <script>
+        function createElem(elemName, textName, className){
+            let elem = document.createElement(elemName)
+            if(textName == undefined){
+                textName = ""
+            }else{
+                elem.innerText = textName
+            }
+            if(className == undefined){
+                className = ""
+            }else{
+                elem.classList.add(className)
+            }
+            return elem
+        }
+        function createAverageTime(sla){
+            let confirm = document.querySelector(".avgTimeConfirm")
+            let newUser = document.querySelector(".avgTimeAddNewEmployer")
+            let anotherUser = document.querySelector(".avgTimeAnotherNewEmployer")
+            confirm.innerText = sla[0]
+            newUser.innerText = sla[1]
+            anotherUser.innerText = sla[2]
+        }
+        async function getAverage(){
+            const responseAverage = await fetch("/api/average", {
+                method: "GET",
+                headers: { "Accept": "application/json" }
+            });
+            let avg
+            if(responseAverage){
+                avg = await responseAverage.json()
+            }
+            createAverageTime(avg)
+        }
+        getAverage()
+    </script>
+</body>
+</html>
