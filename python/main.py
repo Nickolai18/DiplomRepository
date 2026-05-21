@@ -1,14 +1,23 @@
-from fastapi import FastAPI, Form, Body
+from typing import Annotated
+
+from fastapi import FastAPI, Form, Body, HTTPException, Response, Request, Cookie, Depends
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, desc
 from sqlalchemy.orm import DeclarativeBase, sessionmaker, relationship
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from bd import SessionLocal
 from datetime import datetime
+from jose import jwt, JWTError
+from transliterate import translit
 
 from validation import wordValidation
+
+from auth import get_password_hash, verify_password, create_access_token
+
+secret_key = "gV64m9aIzFG4qpgVphvQbPQrtAO0nM-7YwwOvu0XPt5KJOjAy4AfgLkqJXYEt"
+algoritm = "HS256"
 
 SQLALCHEMY_DATABASE_URL = "mysql://root:root@127.0.0.1:3306/calls"
 engine=create_engine(SQLALCHEMY_DATABASE_URL)
@@ -48,19 +57,38 @@ class User(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String)
     surname = Column(String)
-    code = Column(String)
-    number_of_calls = Column(Integer)
-    current_calls = Column(Integer)
+    role = Column(String)
+    login = Column(String)
+    password = Column(String)
 
     def deserialzator(self):
         des = {
+            "id": self.id,
             "name": self.name,
             "surname": self.surname,
-            "code": self.code,
-            "number_of_calls": self.number_of_calls,
-            "current_calls": self.current_calls
+            "role": self.role,
         }
         return des
+
+class Employee(Base):
+    __tablename__ = "employee"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    code = Column(String)
+    number_of_calls = Column(Integer)
+    current_calls = Column(Integer)
+    id_users = Column(Integer)
+
+    def deserialzator(self):
+        des = {
+            "id_users": self.id_users,
+            "code": self.code,
+            "number_of_calls": self.number_of_calls,
+            "current_calls": self.current_calls,
+            "id_users": self.id_users
+        }
+        return des
+
 class SLA(Base):
     __tablename__ = "sla"
 
@@ -87,12 +115,87 @@ class BaseId(BaseModel):
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"))
 
+def create_code(name: str, surname: str):
+    eng_name = translit(name, 'ru', reversed=True)
+    eng_surname = translit(surname, 'ru', reversed=True)
+    code = eng_name[0] + eng_surname[0]
+    return code
+
+def authenticate_user(login, password):
+    user = db.query(User).filter(User.login == login).first()
+    if not user or verify_password(plain_password=password, hashed_password=user.password) == 0:
+        return None
+    return user
+
+def get_current_user(request: Request):
+    token = request.cookies.get('users_access_token')
+    if not token:
+        return None
+    payload = jwt.decode(token, secret_key, algorithms=algoritm)
+    role_id = payload.get('role')
+    return role_id
+
+@app.get("/me")
+def get_me(users_access_token = Cookie()):
+    tok = get_current_user(users_access_token)
+    return {"users_access_token": tok}
+
+@app.get("/login")
+def render_main_index():
+    return FileResponse("static/login.html")
+
+@app.post("/login")
+def auth_user(response: Response, login = Form(), password = Form(), token: str = Depends(get_current_user)):
+    user = authenticate_user(login, password)
+    if user is None:
+        raise HTTPException(status_code=401,
+                            detail='Неверная почта или пароль')
+    access_token = create_access_token(secret_key, algoritm, {"role": str(user.role)})
+    response.set_cookie(key="users_access_token", value=access_token, httponly=True)
+    role = token
+    if role == "operator":
+        return FileResponse("static/index.html")
+    if role == "admin":
+        return FileResponse("static/create_user.html")
+    if role == None:
+        return FileResponse("static/login.html")
+
+@app.get("/create_user")
+def render_main_index():
+    return FileResponse("static/create_user.html")
+
+@app.post("/create_user")
+def register_user(name = Form(), surname = Form(), login = Form(), password = Form(), role = Form()):
+    last_user = db.query(User)
+    arr = []
+    for elem in last_user:
+        arr.append(elem.deserialzator())
+    last_user = arr[-1]
+    new_user = User(id = last_user["id"] + 1, login = login, password = get_password_hash(password), role = role, name = name, surname = surname)
+    db.add(new_user)
+    try:
+        db.commit()
+    except:
+        db.rollback()
+        raise
+    if role == "employee":
+        new_employee = Employee(code=create_code(name, surname), number_of_calls = 0, current_calls = 0, id_users = new_user.id)
+        db.add(new_employee)
+    try:
+        db.commit()
+    except:
+        db.rollback()
+        raise
+    return FileResponse("static/create_user.html")
+
+
+
 def countAvg(start, cancel):
     delta = cancel - start
     return delta.total_seconds() / 3600
 
 def getAllUser():
-    usersUndes = db.query(User)
+    usersUndes = db.query(User).filter(User.role=='employee')
     users = []
     for user in usersUndes:
         users.append(user.deserialzator())
@@ -100,10 +203,41 @@ def getAllUser():
         print(user)
     return users
 
+def getEmployee():
+    usersUndes = db.query(Employee)
+    users = []
+    for user in usersUndes:
+        users.append(user.deserialzator())
+    for user in users:
+        print(user)
+    return users
+#     usersUndes = db.query(User).filter(User.role=='employee')
+#     usersEmployee = db.query(Employee)
+#     users = []
+#     usersEmployeeFetch = []
+#     for user in usersUndes:
+#         users.append(user.deserialzator())
+#     for user in usersEmployee:
+#         usersEmployeeFetch.append(user.deserialzator())
+#     for i in range(len(users)):
+#         users[i].update('current_calls': usersEmployeeFetch[i]['current_user'])
+#     for user in users:
+#         print(user)
+#     return users
+
 # Загрузка главной проблемы(страницы)
 @app.get("/")
-def render_main_index():
+def render_main_index(token: str = Depends(get_current_user)):
+    role = token
+    # if role == "operator":
+    #     return FileResponse("static/index.html")
+    # if role == "admin":
+    #     return FileResponse("static/create_login.html")
+    # if role == None:
+    #     return FileResponse("static/login.html")
     return FileResponse("static/index.html")
+
+
 
 # Загрузка страницы с актуальными заявками
 @app.get("/tickets")
@@ -117,6 +251,11 @@ def render_average():
 @app.get("/api/users")
 def get_users():
     return getAllUser()
+
+@app.get("/api/employee")
+def get_users():
+    return getEmployee()
+
 
 @app.get("/api/cards")
 def render_main_page():
@@ -138,19 +277,31 @@ def render_main_page():
 @app.get("/api/tickets")
 def render_tickets_page():
     ol = db.query(Calls)
+    # now = datetime.now()
     arrOfTest = []
     for elem in ol:
         calls = elem.deserialzator()
         sla = db.query(SLA).filter(SLA.id_ticket == calls["id"]).first()
-        delta = sla.confirm_date - sla.create_date
-        # print(sla["create_date"])
-        # print(sla["confirm_date"])
-        print(delta.days)
-        delta = int(delta.days)
-        print(elem.deserialzator())
-        print(calls["employee"])
+        print(sla.deserialzator())
+        print(calls)
         if (calls["employee"] != "" and calls["secondary_employee"] == None) or (calls["employee"] != "" and calls["secondary_employee"] != ""):
             arrOfTest.append(elem.deserialzator())
+        else:
+            print(2)
+        if sla.confirm_date != None:
+            print("second")
+            # if sla.create_date != None:
+            #     sla.create_calls = now.strftime("%Y-%m-%d %H:%M:%S")
+            delta = sla.confirm_date - sla.create_date
+            delta = int(delta.days)
+        else:
+            print("firsyt")
+            delta = 0
+        print(sla.create_date)
+        # print(sla.confirm_date)
+        print(delta)
+        print(elem.deserialzator())
+        print(calls["employee"])
         if calls["critical"] == 0 and delta > 3:
             calls["critical"] = 1
             arrOfTest.append(calls)
@@ -159,7 +310,8 @@ def render_tickets_page():
             callCriticalLevel2.critical = callCriticalLevel2.critical + 1
             callCriticalLevel2.employee = ""
             db.commit()
-
+    print(1)
+    print(arrOfTest)
     return arrOfTest
 
 @app.get("/api/average")
@@ -173,9 +325,19 @@ def average():
     for elem in sla:
         arrSla.append(elem.deserialzator())
     for elem in arrSla:
-        confirm_date += countAvg(elem["create_date"], elem["confirm_date"])
-        add_another_employee += countAvg(elem["create_date"], elem["add_another_employee"])
-        add_new_employee += countAvg(elem["create_date"], elem["add_new_employee"])
+         if elem["confirm_date"] != None:
+             confirm_date += countAvg(elem["create_date"], elem["confirm_date"])
+         else:
+            confirm_date += 0
+         if elem["add_another_employee"] != None:
+             add_another_employee += countAvg(elem["create_date"], elem["add_another_employee"])
+         else:
+             add_another_employee += 0
+         if elem["add_new_employee"] != None:
+             add_new_employee += countAvg(elem["create_date"], elem["add_new_employee"])
+         else:
+             add_new_employee += 0
+
     print(confirm_date)
     print(add_another_employee)
     print(add_new_employee)
@@ -197,21 +359,26 @@ def form(id = Form(), employee = Form()):
     if secondary_employee == None:
         print("first")
         if employee == 'auto':
-            print(employee)
+            # print(employee)
             usersTo = getAllUser()
             smallestTicket = 100000000
             userCodeSmallest = ''
             for user in usersTo:
-                if user["current_calls"] < smallestTicket:
-                    smallestTicket = user["current_calls"]
-                    userCodeSmallest = user["code"]
+                employee = db.query(Employee).filter(Employee.id_users == user['id']).first()
+                print(employee.deserialzator())
+                employee = employee.deserialzator()
+                print(1)
+                print(employee['current_calls'])
+                if employee['current_calls'] < smallestTicket:
+                    smallestTicket = employee['current_calls']
+                    userCodeSmallest = employee['code']
             print(userCodeSmallest)
-            user = db.query(User).filter(User.code == userCodeSmallest).first()
+            user = db.query(Employee).filter(Employee.code == userCodeSmallest).first()
             user.number_of_calls = user.number_of_calls + 1
             user.current_calls = user.current_calls + 1
             employee = userCodeSmallest
         else:
-            user = db.query(User).filter(User.code == employee).first()
+            user = db.query(Employee).filter(Employee.code == employee).first()
             user.number_of_calls = user.number_of_calls + 1
             user.current_calls = user.current_calls + 1
         sla = db.query(SLA).filter(SLA.id_ticket == id).first()
@@ -234,12 +401,12 @@ def form(id = Form(), employee = Form()):
                     smallestTicket = user["current_calls"]
                     userCodeSmallest = user["code"]
             print(userCodeSmallest)
-            user = db.query(User).filter(User.code == userCodeSmallest).first()
+            user = db.query(Employee).filter(Employee.code == userCodeSmallest).first()
             user.number_of_calls = user.number_of_calls + 1
             user.current_calls = user.current_calls + 1
             employee = userCodeSmallest
         else:
-            user = db.query(User).filter(User.code == employee).first()
+            user = db.query(Employee).filter(Employee.code == employee).first()
             user.number_of_calls = user.number_of_calls + 1
             user.current_calls = user.current_calls + 1
         sla = db.query(SLA).filter(SLA.id_ticket == id).first()
@@ -259,7 +426,7 @@ def form_tickets(id = Form()):
     now = datetime.now()
     # Вытягивание соответствующих строк
     call = db.query(Calls).filter(Calls.id == id).first()
-    user = db.query(User).filter(User.code == call.employee).first()
+    user = db.query(Employee).filter(Employee.code == call.employee).first()
     # Измениние соответствующих строк
     user.current_calls -= 1
     if call.secondary_employee == None:
@@ -268,7 +435,11 @@ def form_tickets(id = Form()):
         call.employee = call.secondary_employee
         call.secondary_employee = None
     # Сохранение соответствующих строк
-    db.commit()
+    try:
+        db.commit()
+    except:
+        db.rollback()
+        raise
     # Возвращение на страницу
     return FileResponse("static/tickets.html")
 

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Форма регистрации</title>
+    <link rel="stylesheet" href="static/style.css">
+    <style>
+        .none{
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <section class="section sectionMenu">
+            <div class="container containerMenu">
+                <a href="" class="link icon"><img class="image" src="static/image/free-icon-insurance-14207142 (1).png" alt=""></a>
+                <a href="" class="link icon"><img class="image" src="static/image/free-icon-history-2961948 (1).png" alt=""></a>
+                <a href="" class="link icon"><img class="image" src="static/image/free-icon-characteristic-12885523 (1).png" alt=""></a>
+            </div>
+        </section>
+    </header>
+    <main>
+        <section class="section sectionLogin">
+            <div class="box boxLogin">
+                <form method="post" action="/create_user" class="formLogin">
+                    <label class="labelLogin" for="">Впишите Имя</label>
+                    <input name="name" type="text" class="inputText">
+                    <label class="labelLogin" for="">Впишите Фамилию</label>
+                    <input name="surname" type="text" class="inputText">
+                    <label class="labelLogin" for="">Придумайте логин</label>
+                    <input name="login" type="text" class="inputText">
+                    <label class="labelLogin" for="">
+                        Придумайте пароль
+                    </label>
+                    <input type="password" class="inputText">
+                    <label class="labelLogin" for="">
+                        Повторите пароль
+                    </label>
+                    <input name="password" type="password" class="inputText">
+                    <select name="role" id="">
+                        <option value="employee">Сотрудник</option>
+                        <option value="operator">Оператор</option>
+                        <option value="emploer">Руководитель</option>
+                        <option value="admin">Администратор</option>
+                    </select>
+                    <input type="submit" class="button buttonLogin">
+                </form>
+            </div>
+        </section>
+    </main>
+    <footer>
+        
+    </footer>
+    </script>
+</body>
+</html>

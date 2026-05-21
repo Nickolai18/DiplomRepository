@@ -21,7 +21,7 @@
 body{
     background-color: aliceblue;
 }
-.section:not(.sectionMenu){
+.section:not(.sectionMenu, .sectionLogin){
     width: 100vw;
     height: 100vh;
     display: flex;
@@ -34,24 +34,19 @@ body{
     padding: 18px;
 }
 .button{
-    width: 70px;
     height: 30px;
     background-color: deepskyblue;
     color: white;
     border: 0;
     border-radius: var(--borderMain);
+    padding: 5px;
+    margin: 5px;
 }
 .marker-critical-1{
     background-color: red!important;
 }
 .marker-critical-2{
     background-color: rgb(201, 21, 21)!important;
-}
-.plus{
-    background-image: url(./image/plus.png);
-    background-size: 23px 23px;
-    background-position: center;
-    background-repeat: no-repeat;
 }
 /*Header*/
 .sectionMenu{
@@ -81,20 +76,20 @@ body{
 }
 .boxCard{
     display: flex;
-    justify-content: center;
+    align-items: center;
+    flex-direction: column;
 }
 .containerCard{
-    width: 100%;
+    max-width: 100%;
     display: flex;
     flex-wrap: wrap;
-    height: 100%;
-    flex-direction: column;
-    justify-content: space-evenly;
-    align-items: center;
+    height: fit-content;
+    justify-content: space-between;
     margin-left: 1vw;
+    flex-direction: column;
 }
 .card{
-    width: 90%;
+    width: 80%;
     height: 100px;
     background-color: whitesmoke;
     padding: 15px;
@@ -105,7 +100,7 @@ body{
     flex-direction: row;
     margin-left: 10px;
     margin-right: 10px;
-    margin-bottom: 40px;
+    margin-top: 20px;
     box-shadow: 2px -2px 5px 0px grey;
     overflow: hidden;
     position: relative;
@@ -117,23 +112,28 @@ body{
     margin-bottom: 0px;
 }
 .buttonCard{
-
+    align-self: end;
 }
-.describtion{
-    width: 50%;
+.radio-employee{
+    width: 90%;
+    height: 100px;
+    background-color: deepskyblue;
+    border-bottom-right-radius: var(--borderMain);
+    border-top-right-radius: var(--borderMain);
+    left: -170px;
+    top: 130px;
+    position: absolute;
+    padding: 25px 0px 25px 25px;
+    transition: 0.3s;
+    overflow-y: scroll;
 }
-.title{
-    font-size: 20px;
-    color: blue;
+.radio-employee:hover{
+    left: 0px;
+    transition: 0.3s;
 }
-.description{
-    text-align: center;
-}
-.isComplete{
-    display: none;
-    background-color: aquamarine;
-    text-decoration: none;
-    color: black;
+.empty{
+    width: 100%;
+    height: 100px;
 }
 /*TICKETS*/
 .sectionTickets{
@@ -153,14 +153,17 @@ body{
 }
 .cardUser{
     width: 200px;
+    height: 300px;
+    flex-direction: column;
 }
 .boxTick{
     width: 85%;
     display: flex;
-    flex-direction: row;
-    overflow-x: scroll;
-    overflow-y: none;
+    flex-direction: column;
+    overflow-x: none;
+    overflow-y: scroll;
     padding: 5px;
+    align-items: center;
 }
 .boxUser{
     width: 10%;
@@ -172,10 +175,13 @@ body{
 }
 .cardTicket{
     min-width: 200px;
-    height: 300px;
+    min-height: 75px;
     margin-bottom: 0px;
+    position: relative;min-width: 200px;
     position: relative;
-    flex-direction: column;
+    justify-content: space-between;
+    padding-left: 100px;
+    padding-right: 100px;
 }
 .marker{
     width: 30px;
@@ -183,7 +189,7 @@ body{
     background-color: var(--colorMain);
     position: absolute;
     top: 0px;
-    left: 140px;
+    left: 30px;
 }
 .wing{
     width: 15px;
@@ -240,12 +246,6 @@ body{
 .numberAud{
     z-index: 5;
 }
-.boxForm{
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-}
 /*AVG*/
 .boxAvg{
     display: flex;
@@ -266,4 +266,47 @@ body{
 }
 .avgTime{
     font-size: 50px;
+}
+/*LOGIN0*/
+.sectionLogin{
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.boxLogin{
+    width: 20%;
+    height: 35%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-direction: column;
+}
+.formLogin{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 18px;
+}
+.labelLogin{
+    align-self: self-start;
+}
+.inputText{
+    width: 100%;
+    height: 50px;
+    font-size: 30px;
+    background-color: var(--borderMain);
+    border: none;
+    border-bottom: 2px var(--colorMain) solid;
+    outline: 0;
+}
+.formLogin > input{
+    margin-bottom: 28px;
+}
+.buttonLogin{
+    align-self: self-end;
 }

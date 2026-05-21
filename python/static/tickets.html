@@ -110,7 +110,15 @@
             if(responseUsers){
                 users = await responseUsers.json()
             }
-            createUsersTicket(users, tickets)
+            let responseEmployee = await fetch("/api/employee",{
+                method: "GET",
+                headers: { "Accept": "application/json" }
+            })
+            let employee
+            if(responseEmployee){
+                employee = await responseEmployee.json()
+            }
+            createUsersTicket(users, employee, tickets)
         }
         // // getTasks()
         // // getUsers().then(response => {
@@ -179,14 +187,17 @@
             return form
         }
 
-        function createUsersTicket(arrayUsers, arrayTickets){
+        function createUsersTicket(arrayUsers, arrayEmployee, arrayTickets){
+            console.log(arrayUsers)
+            console.log(arrayEmployee)
+            console.log(arrayTickets)
             for(let user of arrayUsers){
                 let line = createElem("div", undefined, "line")
                 let contTickets = createElem("div", undefined, "containerTickets")
                 let boxUser = createElem("div", undefined, "boxUser")
                 let boxImage = createElem("div", undefined, "boxImage")
                 let cardTicketUser = createElem("div", undefined, "card")
-                cardTicketUser.classList.add("cardTicket")
+                cardTicketUser.classList.add("cardUser")
                 let imageUser = document.createElement("img")
                 imageUser.classList.add("image") 
                 imageUser.classList.add("imageCard") 
@@ -245,7 +256,14 @@
                         //     boxTick.append(cardTicket)
                         // }
                     // let i = 1
-                    if(ticket["employee"] == user["code"]){
+                    let employeeCode
+                    for(let emplo of arrayEmployee){
+                        if(emplo['id_users'] = user["id"]){
+                            employeeCode = emplo['code']
+                            break
+                        }
+                    }
+                    if(ticket["employee"] == employeeCode){
                         console.log(user["code"])
                         console.log(ticket["code"])
                         let cardTicket = createElem("div", undefined, "card")
