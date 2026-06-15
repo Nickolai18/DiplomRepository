@@ -17,5 +17,5 @@ def create_access_token(secret_key, algoritm, data: dict) -> str:
     encode_jwt = jwt.encode(to_encode, secret_key, algorithm=algoritm)
     return encode_jwt
 
-print(get_password_hash('admin'))
+print(verify_password('1234', '$2b$12$G5DYKxHL6DMAVZwsRCWZIuO59N5Y6MrfSyRvCL67PeOKihjQvrhNa'))
 

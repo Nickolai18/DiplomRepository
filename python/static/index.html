@@ -84,6 +84,7 @@
         }
         function arrAddConflict(arr, users){
             for(let i = 0; i < arr.length; i++){
+                console.log(arr[i])
                 let card = document.createElement('div')
                 card.classList.add("card")
                 let marker = createElem("div", undefined, "marker")
@@ -116,6 +117,7 @@
                     card.append(marker)
                 }
 
+                card.append(createElem('h2', i+1, "title"))
                 card.append(createElem('h1', se.title, "title"))
                 card.append(createElem('p', se.description, "description"))
                 card.append(createForm(users, se.id))
@@ -131,7 +133,7 @@
             if(responseCard){
                 cards = await responseCard.json()
             }
-            let responseUsers = await fetch("/api/users",{
+            let responseUsers = await fetch("/api/employee",{
                 method: "GET",
                 headers: { "Accept": "application/json" }
             })

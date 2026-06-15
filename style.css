@@ -139,6 +139,9 @@ body{
     display: flex;
     flex-direction: column;
 }
+.numberOfCalls{
+    width: 15px;
+}
 .containerTickets{
     height: 340px;
     display: flex;

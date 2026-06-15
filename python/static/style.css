@@ -69,6 +69,12 @@ body{
     width: 100px;
     height: 100px;
 }
+.plus{
+    background-image: url('/static/image/plus.png');
+    background-size: 25px 25px;
+    background-repeat: no-repeat;
+    background-position: center;
+}
 /*Card*/
 .sectionCard{
     /* background-color: antiquewhite; */
@@ -95,7 +101,7 @@ body{
     padding: 15px;
     border-radius: var(--borderMain);
     display: flex;
-    justify-content: space-evenly;
+    justify-content: space-between;
     align-items:center;
     flex-direction: row;
     margin-left: 10px;
@@ -104,6 +110,8 @@ body{
     box-shadow: 2px -2px 5px 0px grey;
     overflow: hidden;
     position: relative;
+    padding-right: 18px;
+    padding-left: 18px;
 }
 /* .card:nth-child(6n){
     margin-right: 0px;
@@ -183,6 +191,9 @@ body{
     padding-left: 100px;
     padding-right: 100px;
 }
+.cardTicket > *{
+    flex-grow: 1;
+}
 .marker{
     width: 30px;
     height: 30px;
@@ -245,6 +256,14 @@ body{
 }
 .numberAud{
     z-index: 5;
+}
+.describtion{
+    flex-grow: 3;
+    text-align: center;
+}
+.boxForm{
+    flex-grow: 0;
+
 }
 /*AVG*/
 .boxAvg{

@@ -37,6 +37,7 @@ class Calls(Base):
     secondary_employee = Column(String, default='')
     critical = Column(Integer)
     time_to_complete = Column(Integer)
+    status = Column(Integer)
     # sla = relationship("SLA", uselist=False, back_populates="ticket")
 
     def deserialzator(self):
@@ -128,41 +129,52 @@ def authenticate_user(login, password):
     return user
 
 def get_current_user(request: Request):
-    token = request.cookies.get('users_access_token')
+    token = request.cookies.get('access_token')
     if not token:
         return None
     payload = jwt.decode(token, secret_key, algorithms=algoritm)
     role_id = payload.get('role')
     return role_id
 
-@app.get("/me")
-def get_me(users_access_token = Cookie()):
-    tok = get_current_user(users_access_token)
-    return {"users_access_token": tok}
+# @app.get("/me")
+# def get_me(users_access_token = Cookie(None)):
+#     tok = get_current_user(users_access_token)
+#     return {"users_access_token": tok}
 
 @app.get("/login")
 def render_main_index():
     return FileResponse("static/login.html")
-
+ 
 @app.post("/login")
-def auth_user(response: Response, login = Form(), password = Form(), token: str = Depends(get_current_user)):
+def auth_user(request: Request, response: Response, login = Form(), password = Form(), token = Depends(get_current_user)):
     user = authenticate_user(login, password)
-    if user is None:
-        raise HTTPException(status_code=401,
-                            detail='Неверная почта или пароль')
+    # print(user.role)N
     access_token = create_access_token(secret_key, algoritm, {"role": str(user.role)})
-    response.set_cookie(key="users_access_token", value=access_token, httponly=True)
-    role = token
-    if role == "operator":
-        return FileResponse("static/index.html")
-    if role == "admin":
-        return FileResponse("static/create_user.html")
-    if role == None:
-        return FileResponse("static/login.html")
+    redirect_op = RedirectResponse("/redirect", status_code=303)
+    redirect_op.set_cookie(key='access_token', value=access_token, httponly=True)
+    # if token == "operator":
+    #     return redirect_op
+    # if token == "admin":
+    #     return redirect_ad
+    # if token == None:
+    return redirect_op
+
+@app.get("/redirect")
+def login_user(token = Depends(get_current_user)):
+    redirect_op = RedirectResponse("/", status_code=303)
+    redirect_ad = RedirectResponse("/create_user", status_code=303)
+    redirect = RedirectResponse("/login", status_code=303)
+    if token == "operator":
+        return redirect_op
+    if token == "admin":
+        return redirect_ad
+    if token == None:
+        return redirect
 
 @app.get("/create_user")
 def render_main_index():
     return FileResponse("static/create_user.html")
+
 
 @app.post("/create_user")
 def register_user(name = Form(), surname = Form(), login = Form(), password = Form(), role = Form()):
@@ -198,19 +210,37 @@ def getAllUser():
     usersUndes = db.query(User).filter(User.role=='employee')
     users = []
     for user in usersUndes:
-        users.append(user.deserialzator())
+        usersEmplo = db.query(Employee).filter(Employee.id_users == user.id).first()
+        user = user.deserialzator()
+        user.update(
+            {
+                'current_calls': usersEmplo.current_calls,
+                'code': usersEmplo.code,
+            }
+        )
+        users.append(user)
     for user in users:
         print(user)
     return users
-
+# us = getAllUser()
+# for elem in us:
+#     print(elem)
 def getEmployee():
     usersUndes = db.query(Employee)
     users = []
     for user in usersUndes:
-        users.append(user.deserialzator())
+        usersEmplo = db.query(User).filter(User.id == user.id_users).first()
+        user = user.deserialzator()
+        user.update(
+            {
+                'name': usersEmplo.name
+            }
+        )
+        users.append(user)
     for user in users:
         print(user)
     return users
+# getEmployee()
 #     usersUndes = db.query(User).filter(User.role=='employee')
 #     usersEmployee = db.query(Employee)
 #     users = []
@@ -227,8 +257,9 @@ def getEmployee():
 
 # Загрузка главной проблемы(страницы)
 @app.get("/")
-def render_main_index(token: str = Depends(get_current_user)):
-    role = token
+def render_main_index(response: Response):
+    # response.set_cookie(key="users_acc", value='rrr', httponly=True)
+    # role = token
     # if role == "operator":
     #     return FileResponse("static/index.html")
     # if role == "admin":
@@ -236,6 +267,7 @@ def render_main_index(token: str = Depends(get_current_user)):
     # if role == None:
     #     return FileResponse("static/login.html")
     return FileResponse("static/index.html")
+
 
 
 
@@ -276,7 +308,7 @@ def render_main_page():
 
 @app.get("/api/tickets")
 def render_tickets_page():
-    ol = db.query(Calls)
+    ol = db.query(Calls).filter(Calls.status == 0)
     # now = datetime.now()
     arrOfTest = []
     for elem in ol:
@@ -394,6 +426,7 @@ def form(id = Form(), employee = Form()):
         if employee == 'auto':
             print(employee)
             usersTo = getAllUser()
+            print(usersTo)
             smallestTicket = 100000000
             userCodeSmallest = ''
             for user in usersTo:
@@ -407,6 +440,7 @@ def form(id = Form(), employee = Form()):
             employee = userCodeSmallest
         else:
             user = db.query(Employee).filter(Employee.code == employee).first()
+            print(user.deserialzator())
             user.number_of_calls = user.number_of_calls + 1
             user.current_calls = user.current_calls + 1
         sla = db.query(SLA).filter(SLA.id_ticket == id).first()
@@ -456,4 +490,13 @@ def form_add_new_user(id = Form()):
     db.commit()
     return FileResponse("static/tickets.html")
 
-
+@app.post("/complete_tickets")
+def change_status(id = Form()):
+    call = db.query(Calls).filter(Calls.id == id).first()
+    call.status = 1
+    try:
+        db.commit()
+    except:
+        db.rollback()
+        raise
+    return FileResponse("static/tickets.html")
