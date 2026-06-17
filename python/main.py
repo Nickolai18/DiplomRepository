@@ -123,10 +123,15 @@ def create_code(name: str, surname: str):
     return code
 
 def authenticate_user(login, password):
-    user = db.query(User).filter(User.login == login).first()
-    if not user or verify_password(plain_password=password, hashed_password=user.password) == 0:
+    try:
+        user = db.query(User).filter(User.login == login).one()
+    except:
         return None
-    return user
+    print(user.deserialzator())
+    # if not user or verify_password(plain_password=password, hashed_password=user.password) == 0:
+    #     return None
+    # else:
+    return user.deserialzator()
 
 def get_current_user(request: Request):
     token = request.cookies.get('access_token')
@@ -148,8 +153,11 @@ def render_main_index():
 @app.post("/login")
 def auth_user(request: Request, response: Response, login = Form(), password = Form(), token = Depends(get_current_user)):
     user = authenticate_user(login, password)
+    if user == None:
+        return HTTPException(status_code=401)
+    print(user)
     # print(user.role)N
-    access_token = create_access_token(secret_key, algoritm, {"role": str(user.role)})
+    access_token = create_access_token(secret_key, algoritm, {"role": str(user["role"])})
     redirect_op = RedirectResponse("/redirect", status_code=303)
     redirect_op.set_cookie(key='access_token', value=access_token, httponly=True)
     # if token == "operator":
@@ -159,21 +167,29 @@ def auth_user(request: Request, response: Response, login = Form(), password = F
     # if token == None:
     return redirect_op
 
+
 @app.get("/redirect")
 def login_user(token = Depends(get_current_user)):
     redirect_op = RedirectResponse("/", status_code=303)
     redirect_ad = RedirectResponse("/create_user", status_code=303)
+    redirect_ey = RedirectResponse("/tickets", status_code=303)
     redirect = RedirectResponse("/login", status_code=303)
-    if token == "operator":
+    print(token)
+    if token == "operator" or token == "emploer":
         return redirect_op
     if token == "admin":
         return redirect_ad
+    if token == "employee":
+        return redirect_ey
     if token == None:
         return redirect
 
 @app.get("/create_user")
-def render_main_index():
-    return FileResponse("static/create_user.html")
+def render_main_index(token = Depends(get_current_user)):
+    if token == "admin":
+        return FileResponse("static/create_user.html")
+    else:
+        return {"Ошибка": "У вас нет доступа к данной странице"}
 
 
 @app.post("/create_user")
@@ -257,28 +273,28 @@ def getEmployee():
 
 # Загрузка главной проблемы(страницы)
 @app.get("/")
-def render_main_index(response: Response):
-    # response.set_cookie(key="users_acc", value='rrr', httponly=True)
-    # role = token
-    # if role == "operator":
-    #     return FileResponse("static/index.html")
-    # if role == "admin":
-    #     return FileResponse("static/create_login.html")
-    # if role == None:
-    #     return FileResponse("static/login.html")
-    return FileResponse("static/index.html")
-
-
-
+def render_main_index(response: Response, token = Depends(get_current_user)):
+    print(token)
+    if token == "operator" or token == "emploer":
+        return FileResponse("static/index.html")
+    else:
+        return {"Ошибка": "У вас нет доступа к данной странице"}
 
 # Загрузка страницы с актуальными заявками
 @app.get("/tickets")
-def render_tickets():
-    return FileResponse("static/tickets.html")
+def render_tickets(token = Depends(get_current_user)):
+    if token == "operator" or token == "emploer" or token == "employee":
+        return FileResponse("static/tickets.html")
+    else:
+        return {"Ошибка": "У вас нет доступа к данной странице"}
 
 @app.get("/analise")
-def render_average():
-    return FileResponse("static/analise.html")
+def render_average(token = Depends(get_current_user)):
+    print(token)
+    if token == "emploer":
+        return FileResponse("static/analise.html")
+    else:
+        return {"Ошибка": "У вас нет доступа к данной странице"}
 
 @app.get("/api/users")
 def get_users():

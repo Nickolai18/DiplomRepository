@@ -68,6 +68,7 @@ body{
 .icon{
     width: 100px;
     height: 100px;
+    text-align: center;
 }
 .plus{
     background-image: url('/static/image/plus.png');
